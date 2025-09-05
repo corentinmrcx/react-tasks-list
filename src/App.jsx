@@ -8,14 +8,14 @@ import Main from './components/Main.jsx';
 import Footer from './components/Footer.jsx';
 
 export default function App() {
-  const { theme, toggleTheme } = useTheme(lightTheme, darkTheme, 'light');
+  const { theme, mode, toggleTheme } = useTheme(lightTheme, darkTheme, 'light');
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Header />
       <Main />
-      <Footer onToggleTheme={toggleTheme} />
+      <Footer onToggleTheme={toggleTheme} mode={mode} />
     </ThemeProvider>
   );
 }
