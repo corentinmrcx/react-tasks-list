@@ -4,6 +4,7 @@ import Brightness2Icon from '@mui/icons-material/Brightness2';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { ThemeContext } from '../context/theme/index.js';
+import NotificationButton from './NotificationButton.jsx';
 
 export default function Footer() {
   const { mode, toggleTheme } = useContext(ThemeContext);
@@ -15,9 +16,7 @@ export default function Footer() {
           {mode === 'light' ? <Brightness2Icon /> : <LightModeIcon />}
         </IconButton>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton color="inherit">
-          <NotificationsNoneIcon />
-        </IconButton>
+        <NotificationButton />
       </Toolbar>
     </AppBar>
   );
