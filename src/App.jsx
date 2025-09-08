@@ -1,4 +1,6 @@
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import React from 'react';
+import { CssBaseline } from '@mui/material';
+import ThemeProvider from './context/theme/Provider.jsx';
 import useTheme from './hooks/useTheme';
 import lightTheme from './themes/lightTheme';
 import darkTheme from './themes/darkTheme';
@@ -11,11 +13,11 @@ export default function App() {
   const { theme, mode, toggleTheme } = useTheme(lightTheme, darkTheme, 'light');
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <CssBaseline />
       <Header />
       <Main />
-      <Footer onToggleTheme={toggleTheme} mode={mode} />
+      <Footer />
     </ThemeProvider>
   );
 }
