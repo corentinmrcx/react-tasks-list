@@ -1,17 +1,35 @@
-import React from 'react';
-import Badge from '@mui/material/Badge';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState } from "react";
+import Badge from "@mui/material/Badge";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useSelector, useDispatch } from "react-redux";
+import NotificationsDrawer from "./NotificationsDrawer";
+import { removeNotification, clearNotifications } from "../store/slices/notification";
 
-const NotificationButton = () => {
+export default function NotificationButton() {
   const notifications = useSelector(state => state.notifications.notifications);
+  const dispatch = useDispatch();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  return(
-    <Badge badgeContent={notifications.length} color="error">
-      <NotificationsIcon color="white" />
-    </Badge>
-    );
+  const handleRemove = (id) => dispatch(removeNotification(id));
+  const handleClearAll = () => dispatch(clearNotifications());
 
+  return (
+    <>
+      <Badge
+        badgeContent={notifications.filter(n => n.visible).length}
+        color="error"
+        onClick={() => setDrawerOpen(true)}
+        sx={{ cursor: "pointer" }}
+      >
+        <NotificationsIcon />
+      </Badge>
+      <NotificationsDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        notifications={notifications}
+        onRemove={handleRemove}
+        onClearAll={handleClearAll}
+      />
+    </>
+  );
 }
-
-export default NotificationButton;
