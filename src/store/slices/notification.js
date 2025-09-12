@@ -19,9 +19,17 @@ const notificationsSlice = createSlice({
       });
       state.nextId += 1;
     },
+    hideNotification: (state, action) => {
+      const notif = state.notifications.find(n => n.id === action.payload);
+      if (notif){
+        notif.visible = false;
+      }
+    },
+    removeNotification: (state, action) => {
+      state.notifications = state.notifications.filter(n => n.id !== action.payload);
+    }
   },
 });
 
-export const { addNotification } = notificationsSlice.actions;
-
+export const { addNotification, hideNotification, removeNotification } = notificationsSlice.actions;
 export default notificationsSlice.reducer;

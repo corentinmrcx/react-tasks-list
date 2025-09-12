@@ -4,11 +4,18 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import {  useDispatch } from 'react-redux';
-import { addNotification } from '../store/slices/notification.js';
+import {  useDispatch, useSelector } from 'react-redux';
+import {
+  addNotification,
+  hideNotification,
+  removeNotification,
+} from '../store/slices/notification.js';
+import Toast from './Toast.jsx';
 
 export default function Main() {
   const dispatch = useDispatch();
+  const notifications = useSelector(state => state.notifications.notifications);
+  const visibleNotification = notifications.find(n => n.visible);
 
   const handleAddNotification = (type) => {
     dispatch(addNotification({
@@ -16,6 +23,9 @@ export default function Main() {
       type: type,
     }));
   };
+
+  const handleHide = (id) => dispatch(hideNotification(id));
+  const handleRemove = (id) => dispatch(removeNotification(id));
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
@@ -49,6 +59,12 @@ export default function Main() {
           SUCCESS
         </Button>
       </Stack>
+      <Toast
+        notification={visibleNotification}
+        autoHideDuration={3000}
+        onClose={handleHide}
+        onRemove={handleRemove}
+      />
     </Box>
   );
 }
