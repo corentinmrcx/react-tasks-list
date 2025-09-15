@@ -7,6 +7,7 @@ import { removeNotification, clearNotifications } from "../store/slices/notifica
 
 export default function NotificationButton() {
   const notifications = useSelector(state => state.notifications.notifications);
+  const badgeCount = notifications.length;
   const dispatch = useDispatch();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -16,7 +17,7 @@ export default function NotificationButton() {
   return (
     <>
       <Badge
-        badgeContent={notifications.filter(n => n.visible).length}
+        badgeContent={badgeCount}
         color="error"
         onClick={() => setDrawerOpen(true)}
         sx={{ cursor: "pointer" }}
