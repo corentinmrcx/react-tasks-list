@@ -12,6 +12,7 @@ import {
 } from '../store/slices/notification.js';
 import Toast from './Toast.jsx';
 import { useGetAuthenticatedUserQuery } from '../store/api';
+import LoginForm from './LoginForm';
 
 export default function Main() {
   const dispatch = useDispatch();
@@ -29,6 +30,10 @@ export default function Main() {
       console.log('Données utilisateur récupérées :', data);
     }
   }, [data, error, isLoading]);
+
+  if (error) {
+    return <LoginForm />;
+  }
 
   const handleAddNotification = (type) => {
     dispatch(addNotification({

@@ -9,7 +9,17 @@ export const api = createApi({
     getAuthenticatedUser: build.query({
       query: () => '/me',
     }),
+    authenticateUser: build.mutation({
+      query: ({ login, password, remember }) => ({
+        url: '/auth',
+        method: 'POST',
+        body: { login, password, remember },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetAuthenticatedUserQuery } = api;
+export const { useGetAuthenticatedUserQuery, useAuthenticateUserMutation } = api;
