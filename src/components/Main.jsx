@@ -11,11 +11,24 @@ import {
   removeNotification,
 } from '../store/slices/notification.js';
 import Toast from './Toast.jsx';
+import { useGetAuthenticatedUserQuery } from '../store/api';
 
 export default function Main() {
   const dispatch = useDispatch();
   const notifications = useSelector(state => state.notifications.notifications);
   const visibleNotification = notifications.find(n => n.visible);
+
+  const { data, error, isLoading } = useGetAuthenticatedUserQuery();
+
+  React.useEffect(() => {
+    if (isLoading) {
+      console.log('Chargement des données');
+    } else if (error) {
+      console.error('Erreur lors de la récupération des données utilisateur :', error);
+    } else if (data) {
+      console.log('Données utilisateur récupérées :', data);
+    }
+  }, [data, error, isLoading]);
 
   const handleAddNotification = (type) => {
     dispatch(addNotification({
