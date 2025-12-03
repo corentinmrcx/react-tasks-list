@@ -9,12 +9,12 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const login = loginRef.current.value;
+    const loginValue = loginRef.current.value;
     const password = passwordRef.current.value;
 
     try {
-      const response = await authenticateUser({ login, password }).unwrap();
-      console.log('Tokens reçus :', response);
+      const response = await authenticateUser({ login: loginValue, password }).unwrap();
+      console.log('Authentification réussie :', response);
     } catch (err) {
       console.error('Erreur lors de l\'authentification :', err);
     }

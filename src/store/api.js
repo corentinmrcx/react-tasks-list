@@ -10,16 +10,26 @@ export const api = createApi({
       query: () => '/me',
     }),
     authenticateUser: build.mutation({
-      query: ({ login, password, remember }) => ({
-        url: '/auth',
-        method: 'POST',
-        body: { login, password, remember },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }),
-    }),
-  }),
+      async queryFn({ login, password, remember }, queryApi, extraOptions, baseQuery) {
+        const authResult = await baseQuery({
+          url: '/auth',
+          method: 'POST',
+          body: { login, password, remember },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (authResult.error) {
+          return { error: authResult.error }
+        }
+
+        queryApi.dispatch(api.endpoints.getAuthenticatedUser.initiate())
+
+        return { data: authResult.data }
+      }
+    })
+  })
 });
 
 export const { useGetAuthenticatedUserQuery, useAuthenticateUserMutation } = api;
