@@ -5,19 +5,19 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {  useDispatch, useSelector } from 'react-redux';
-import {
-  addNotification,
-  hideNotification,
-  removeNotification,
-} from '../store/slices/notification.js';
+import { addNotification, hideNotification, removeNotification } from '../store/slices/notification.js';
 import Toast from './Toast.jsx';
 import { useGetAuthenticatedUserQuery } from '../store/api';
 import LoginForm from './LoginForm';
+import useServiceWorker from '../hooks/useServiceWorker';
 
 export default function Main() {
   const dispatch = useDispatch();
   const notifications = useSelector(state => state.notifications.notifications);
   const visibleNotification = notifications.find(n => n.visible);
+  const isServiceWorkerReady = useServiceWorker('/sw.js', (notification) => {
+    dispatch(addNotification(notification));
+  });
 
   const { data, error, isLoading } = useGetAuthenticatedUserQuery();
 
@@ -30,6 +30,10 @@ export default function Main() {
       console.log('Données utilisateur récupérées :', data);
     }
   }, [data, error, isLoading]);
+
+  if (!isServiceWorkerReady) {
+    return null;
+  }
 
   if (error) {
     return <LoginForm />;
