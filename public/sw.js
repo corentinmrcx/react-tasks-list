@@ -1,7 +1,6 @@
 let accessToken = null;
-let refreshToken = null;
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   console.log('Service Worker : Installation');
   self.skipWaiting();
 });
@@ -27,19 +26,20 @@ self.addEventListener('fetch', (event) => {
               const data = await response.json();
 
               if (data.token) accessToken = data.token;
-              if (data.refreshToken) refreshToken = data.refreshToken;
 
-              const client = await self.clients.get(event.clientId);
-              if (client) {
+              const clients = await self.clients.matchAll();
+              clients.forEach(client => {
+                client.postMessage({
+                  type: 'authentication'
+                });
                 client.postMessage({
                   type: 'notification',
                   notification: { content: 'Authentification réussie', type: 'success' }
                 });
-              }
+              });
 
               const dataWithoutJWT = { ...data };
               delete dataWithoutJWT.accessToken;
-              delete dataWithoutJWT.refreshToken;
 
               return new Response(JSON.stringify(dataWithoutJWT), {
                 status: response.status,
@@ -80,7 +80,28 @@ self.addEventListener('fetch', (event) => {
         headers.set('Authorization', `Bearer ${accessToken}`);
 
         const authenticatedRequest = new Request(event.request, { headers });
-        event.respondWith(fetch(authenticatedRequest));
+        event.respondWith(
+          fetch(authenticatedRequest).then(async (response) => {
+            // Gérer la déconnexion en cas d'erreur 401
+            if (response.status === 401) {
+              accessToken = null;
+
+              // Envoyer le message de déconnexion à tous les clients
+              const clients = await self.clients.matchAll();
+              clients.forEach(client => {
+                client.postMessage({
+                  type: 'unauthenticated'
+                });
+                client.postMessage({
+                  type: 'notification',
+                  notification: { content: 'Session expirée, veuillez vous reconnecter', type: 'warning' }
+                });
+              });
+            }
+
+            return response;
+          })
+        );
       }
     }
   }

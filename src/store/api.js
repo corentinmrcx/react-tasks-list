@@ -9,6 +9,9 @@ export const api = createApi({
     getAuthenticatedUser: build.query({
       query: () => '/me',
     }),
+    getTaskLists: build.query({
+      query: () => '/me/task_lists',
+    }),
     authenticateUser: build.mutation({
       async queryFn({ login, password, remember }, queryApi, extraOptions, baseQuery) {
         const authResult = await baseQuery({
@@ -32,4 +35,4 @@ export const api = createApi({
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useAuthenticateUserMutation } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useAuthenticateUserMutation } = api;

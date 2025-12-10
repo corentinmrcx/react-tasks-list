@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const useServiceWorker = (swPath, onNotification) => {
+const useServiceWorker = (swPath, onNotification, onAuthentication, onUnauthenticated) => {
   const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
@@ -12,6 +12,12 @@ const useServiceWorker = (swPath, onNotification) => {
     const handleMessage = (event) => {
       if (event.data.type === 'notification' && event.data.notification && onNotification) {
         onNotification(event.data.notification);
+      }
+      if (event.data.type === 'authentication' && onAuthentication) {
+        onAuthentication();
+      }
+      if (event.data.type === 'unauthenticated' && onUnauthenticated) {
+        onUnauthenticated();
       }
     };
 
