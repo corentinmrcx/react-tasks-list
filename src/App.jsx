@@ -45,6 +45,12 @@ function ServiceWorkerRegistrar() {
     },
     () => {
       dispatch(setAuthenticated(false));
+    },
+    () => {
+      dispatch(addNotification({
+        content: 'Jetons d\'authentification rafraîchis',
+        type: 'info'
+      }));
     }
   );
 

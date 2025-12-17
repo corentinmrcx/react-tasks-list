@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const useServiceWorker = (swPath, onNotification, onAuthentication, onUnauthenticated) => {
+const useServiceWorker = (swPath, onNotification, onAuthentication, onUnauthenticated, onTokenRefreshed) => {
   const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
@@ -18,6 +18,9 @@ const useServiceWorker = (swPath, onNotification, onAuthentication, onUnauthenti
       }
       if (event.data.type === 'unauthenticated' && onUnauthenticated) {
         onUnauthenticated();
+      }
+      if (event.data.type === 'token-refreshed' && onTokenRefreshed) {
+        onTokenRefreshed();
       }
     };
 

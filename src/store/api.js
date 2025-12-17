@@ -13,9 +13,9 @@ export const api = createApi({
       query: () => '/me/task_lists',
     }),
     authenticateUser: build.mutation({
-      async queryFn({ login, password, remember }, queryApi, extraOptions, baseQuery) {
+       async queryFn({ login, password, remember, ttl = 30 }, queryApi, extraOptions, baseQuery) {
         const authResult = await baseQuery({
-          url: '/auth',
+          url: `/auth?ttl=${ttl}`,
           method: 'POST',
           body: { login, password, remember },
           headers: {
