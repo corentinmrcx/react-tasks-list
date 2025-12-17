@@ -6,30 +6,13 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {  useDispatch, useSelector } from 'react-redux';
-import { addNotification, hideNotification, removeNotification } from '../store/slices/notification.js';
-import { setAuthenticated } from '../store/slices/auth.js';
-import Toast from './Toast.jsx';
+import { addNotification } from '../store/slices/notification.js';
 import { useGetTaskListsQuery } from '../store/api';
 import LoginForm from './LoginForm';
-import useServiceWorker from '../hooks/useServiceWorker';
 
 export default function Main() {
   const dispatch = useDispatch();
-  const notifications = useSelector(state => state.notifications.notifications);
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
-  const visibleNotification = notifications.find(n => n.visible);
-
-  const isServiceWorkerReady = useServiceWorker('/sw.js',
-    (notification) => {
-      dispatch(addNotification(notification));
-    },
-    () => {
-      dispatch(setAuthenticated(true));
-    },
-    () => {
-      dispatch(setAuthenticated(false));
-    }
-  );
 
   const { data: taskListsData, error, isLoading, refetch } = useGetTaskListsQuery(undefined, {
     skip: !isAuthenticated,
@@ -45,10 +28,6 @@ export default function Main() {
     }
   }, [taskListsData, error, isLoading]);
 
-  if (!isServiceWorkerReady) {
-    return null;
-  }
-
   if (!isAuthenticated) {
     return <LoginForm />;
   }
@@ -59,9 +38,6 @@ export default function Main() {
       type: type,
     }));
   };
-
-  const handleHide = (id) => dispatch(hideNotification(id));
-  const handleRemove = (id) => dispatch(removeNotification(id));
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 3, gap: 3 }}>
@@ -107,12 +83,6 @@ export default function Main() {
           SUCCESS
         </Button>
       </Stack>
-      <Toast
-        notification={visibleNotification}
-        autoHideDuration={3000}
-        onClose={handleHide}
-        onRemove={handleRemove}
-      />
     </Box>
   );
 }
