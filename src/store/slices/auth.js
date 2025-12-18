@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { api } from '../api';
 
 const authSlice = createSlice({
   name: 'auth',
@@ -9,6 +10,14 @@ const authSlice = createSlice({
     setAuthenticated: (state, action) => {
       state.isAuthenticated = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addMatcher(
+      api.endpoints.getAuthenticatedUser.matchFulfilled,
+      (state) => {
+        state.isAuthenticated = true;
+      }
+    );
   },
 });
 

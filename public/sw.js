@@ -178,7 +178,11 @@ self.addEventListener('fetch', (event) => {
     const headers = new Headers(event.request.headers);
     headers.set('Authorization', `Bearer ${accessToken}`);
 
-    const authenticatedRequest = new Request(event.request, { headers });
+    const authenticatedRequest = new Request(event.request, {
+      headers,
+      mode: 'cors',
+      credentials: 'same-origin'
+    });
 
     try {
       const response = await fetch(authenticatedRequest);
@@ -190,7 +194,11 @@ self.addEventListener('fetch', (event) => {
           const newHeaders = new Headers(event.request.headers);
           newHeaders.set('Authorization', `Bearer ${accessToken}`);
 
-          const retryRequest = new Request(event.request, { headers: newHeaders });
+          const retryRequest = new Request(event.request, {
+            headers: newHeaders,
+            mode: 'cors',
+            credentials: 'same-origin'
+          });
           return await fetch(retryRequest);
         } else {
           return response;
