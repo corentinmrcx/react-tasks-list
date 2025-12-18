@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
-import { Box, Button, TextField, Typography, Link } from '@mui/material';
+import React, { useRef, useState } from 'react';
+import { Box, Button, TextField, Typography, Link, FormControlLabel, Checkbox } from '@mui/material';
 import { useAuthenticateUserMutation } from '../store/api';
 
 const LoginForm = () => {
   const loginRef = useRef();
   const passwordRef = useRef();
+  const [remember, setRemember] = useState(false);
   const [authenticateUser, { error }] = useAuthenticateUserMutation();
 
   const handleSubmit = async (e) => {
@@ -13,7 +14,7 @@ const LoginForm = () => {
     const password = passwordRef.current.value;
 
     try {
-      const response = await authenticateUser({ login: loginValue, password }).unwrap();
+      const response = await authenticateUser({ login: loginValue, password, remember }).unwrap();
       console.log('Authentification réussie :', response);
     } catch (err) {
       console.error('Erreur lors de l\'authentification :', err);
@@ -40,6 +41,15 @@ const LoginForm = () => {
           fullWidth
           margin="normal"
           inputRef={passwordRef}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+          }
+          label="Se souvenir de moi"
         />
         <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
           Se connecter

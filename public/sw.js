@@ -1,6 +1,52 @@
 let accessToken = null;
 let refreshToken = null;
 
+const AUTH_CACHE_NAME = 'auth-cache';
+const AUTH_CACHE_KEY = 'auth-data';
+
+async function getCachedItem(itemName) {
+  const cache = await caches.open(AUTH_CACHE_NAME);
+  const response = await cache.match(AUTH_CACHE_KEY);
+  
+  if (!response) return null;
+  
+  const data = await response.json();
+  return data[itemName] || null;
+}
+
+async function setCachedItem(itemName, value) {
+  const cache = await caches.open(AUTH_CACHE_NAME);
+  const response = await cache.match(AUTH_CACHE_KEY);
+  
+  let data = {};
+  if (response) data = await response.json();
+  data[itemName] = value;
+  
+  const newResponse = new Response(JSON.stringify(data), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+  
+  await cache.put(AUTH_CACHE_KEY, newResponse);
+}
+
+async function removeCachedItem(itemName) {
+  const cache = await caches.open(AUTH_CACHE_NAME);
+  const response = await cache.match(AUTH_CACHE_KEY);
+  
+  if (!response) {
+    return;
+  }
+  
+  const data = await response.json();
+  delete data[itemName];
+  
+  const newResponse = new Response(JSON.stringify(data), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+  
+  await cache.put(AUTH_CACHE_KEY, newResponse);
+}
+
 async function notifyClients(type, notification = null) {
   const clients = await self.clients.matchAll({ includeUncontrolled: true });
   clients.forEach(client => {
@@ -41,6 +87,7 @@ async function refreshAccessToken() {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('Service Worker : Échec du rafraîchissement', errorData);
+      await removeCachedItem('refreshToken');
       await handleUnauthenticated();
       return false;
     }
@@ -57,6 +104,11 @@ async function refreshAccessToken() {
 
     if (newRefreshToken) {
       refreshToken = newRefreshToken;
+      
+      const cachedToken = await getCachedItem('refreshToken');
+      if (cachedToken) {
+        await setCachedItem('refreshToken', refreshToken);
+      }
     }
 
     await notifyClients('token-refreshed', {
@@ -68,6 +120,7 @@ async function refreshAccessToken() {
     return true;
   } catch (error) {
     console.error('Erreur lors du rafraîchissement des jetons:', error);
+    await removeCachedItem('refreshToken');
     await handleUnauthenticated();
     return false;
   }
@@ -91,7 +144,16 @@ self.addEventListener('install', () => {
 
 self.addEventListener('activate', (event) => {
   console.log('Service Worker : Activation');
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    (async () => {
+      await self.clients.claim();
+      const cachedRefreshToken = await getCachedItem('refreshToken');
+      if (cachedRefreshToken) {
+        refreshToken = cachedRefreshToken;
+        console.log('Service Worker : Refresh token chargé depuis le cache');
+      }
+    })()
+  );
 });
 
 self.addEventListener('message', (event) => {
@@ -123,6 +185,8 @@ self.addEventListener('fetch', (event) => {
           const refreshTokenFromResponse = data?.refreshToken || data?.refresh_token;
           if (refreshTokenFromResponse) {
             refreshToken = refreshTokenFromResponse;
+            const remember = url.searchParams.get('remember');
+            if (remember === 'true') await setCachedItem('refreshToken', refreshToken);
           }
 
           await notifyClients('authentication', {
@@ -184,7 +248,8 @@ self.addEventListener('fetch', (event) => {
         if (response.ok) {
           accessToken = null;
           refreshToken = null;
-
+          await removeCachedItem('refreshToken');
+          await notifyClients('logout');
           await notifyClients('notification', {
             content: 'Déconnexion réussie',
             type: 'success'
