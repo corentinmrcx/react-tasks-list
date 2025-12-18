@@ -165,6 +165,40 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  if (url.pathname.endsWith('/logout') && event.request.method === 'POST') {
+    event.respondWith((async () => {
+      if (!accessToken) throw new Error('Non authentifié');
+
+      const headers = new Headers(event.request.headers);
+      headers.set('Authorization', `Bearer ${accessToken}`);
+
+      const authenticatedRequest = new Request(event.request, {
+        headers,
+        mode: 'cors',
+        credentials: 'same-origin'
+      });
+
+      try {
+        const response = await fetch(authenticatedRequest);
+
+        if (response.ok) {
+          accessToken = null;
+          refreshToken = null;
+
+          await notifyClients('notification', {
+            content: 'Déconnexion réussie',
+            type: 'success'
+          });
+        }
+
+        return response;
+      } catch (error) {
+        throw new Error('Erreur de déconnexion: ' + error.message);
+      }
+    })());
+    return;
+  }
+
   if (url.pathname.includes('/auth/refresh')) {
     return;
   }

@@ -36,6 +36,10 @@ function NotificationsHost() {
 function ServiceWorkerRegistrar() {
   const dispatch = useDispatch();
 
+  const handleUnauthenticated = () => {
+    dispatch(setAuthenticated(false));
+  };
+
   useServiceWorker('/sw.js',
     (notification) => {
       dispatch(addNotification(notification));
@@ -43,15 +47,14 @@ function ServiceWorkerRegistrar() {
     () => {
       dispatch(setAuthenticated(true));
     },
-    () => {
-      dispatch(setAuthenticated(false));
-    },
+    handleUnauthenticated,
     () => {
       dispatch(addNotification({
         content: 'Jetons d\'authentification rafraîchis',
         type: 'info'
       }));
-    }
+    },
+    handleUnauthenticated
   );
 
   return null;

@@ -31,8 +31,21 @@ export const api = createApi({
 
         return { data: authResult.data }
       }
+    }),
+    logoutUser: build.mutation({
+      async queryFn(arg, queryApi, extraOptions, baseQuery) {
+        const logoutResult = await baseQuery({
+          url: '/logout',
+          method: 'POST',
+        })
+
+        if (logoutResult.error) return { error: logoutResult.error }
+        queryApi.dispatch(api.util.resetApiState())
+
+        return { data: logoutResult.data }
+      }
     })
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useAuthenticateUserMutation } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useAuthenticateUserMutation, useLogoutUserMutation } = api;
