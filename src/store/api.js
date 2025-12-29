@@ -12,6 +12,9 @@ export const api = createApi({
     getTaskLists: build.query({
       query: () => '/me/task_lists',
     }),
+    getTaskList: build.query({
+      query: (id) => `/task_lists/${id}`,
+    }),
     createTaskList: build.mutation({
       query: (taskList) => ({
         url: '/me/task_lists',
@@ -20,6 +23,12 @@ export const api = createApi({
         headers: {
           'Content-Type': 'application/ld+json',
         },
+      }),
+    }),
+    deleteTaskList: build.mutation({
+      query: (id) => ({
+        url: `/task_lists/${id}`,
+        method: 'DELETE',
       }),
     }),
     authenticateUser: build.mutation({
@@ -58,4 +67,4 @@ export const api = createApi({
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useCreateTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation } = api;
