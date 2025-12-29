@@ -12,6 +12,16 @@ export const api = createApi({
     getTaskLists: build.query({
       query: () => '/me/task_lists',
     }),
+    createTaskList: build.mutation({
+      query: (taskList) => ({
+        url: '/me/task_lists',
+        method: 'POST',
+        body: JSON.stringify(taskList),
+        headers: {
+          'Content-Type': 'application/ld+json',
+        },
+      }),
+    }),
     authenticateUser: build.mutation({
        async queryFn({ login, password, remember = false, ttl = 30 }, queryApi, extraOptions, baseQuery) {
         const authResult = await baseQuery({
@@ -48,4 +58,4 @@ export const api = createApi({
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useAuthenticateUserMutation, useLogoutUserMutation } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useCreateTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation } = api;
