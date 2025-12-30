@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { useLocation, useParams } from 'wouter';
-import { Delete } from '@mui/icons-material';
-import { useDeleteTaskListMutation, useGetTaskListQuery } from '../../store/api';
+import { Delete, Edit } from '@mui/icons-material';
+import { useDeleteTaskListMutation, useGetTaskListQuery, useUpdateTaskListMutation } from '../../store/api';
 import { useDispatch } from 'react-redux';
 import { addNotification } from '../../store/slices/notification';
+import TaskListEdit from '../../components/TaskListEdit';
 
 export default function TaskListDetails() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const { data: taskList, isLoading } = useGetTaskListQuery(id);
   const [deleteTaskList] = useDeleteTaskListMutation();
+  const [updateTaskList] = useUpdateTaskListMutation();
   const [openDialog, setOpenDialog] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const dispatch = useDispatch();
 
   const handleDelete = async () => {
@@ -31,6 +34,22 @@ export default function TaskListDetails() {
     }
   };
 
+  const handleSaveTitle = async (newTitle) => {
+    try {
+      await updateTaskList({ id, title: newTitle }).unwrap();
+      dispatch(addNotification({
+        content: 'Titre mis à jour avec succès',
+        type: 'success',
+      }));
+    } catch (err) {
+      dispatch(addNotification({
+        content: 'Erreur lors de la mise à jour du titre',
+        type: 'error',
+      }));
+      console.error('Erreur lors de la mise à jour:', err);
+    }
+  };
+
   if (isLoading || !taskList) {
     return <Typography sx={{ p: 2 }}>Chargement...</Typography>;
   }
@@ -39,10 +58,28 @@ export default function TaskListDetails() {
     <>
       <Box sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h4">{taskList.title}</Typography>
-          <Button color="error" startIcon={<Delete />} onClick={() => setOpenDialog(true)}>
-            Supprimer
-          </Button>
+          {isEditMode ? (
+            <TaskListEdit title={taskList.title} onSave={handleSaveTitle} />
+          ) : (
+            <Typography variant="h4">{taskList.title}</Typography>
+          )}
+          
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {taskList.owner && (
+              <Button 
+                color="info"
+                startIcon={<Edit />} 
+                onClick={() => setIsEditMode(!isEditMode)}
+              >
+                {isEditMode ? 'Terminer' : 'Modifier'}
+              </Button>
+            )}
+            {isEditMode && (
+              <Button color="error" startIcon={<Delete />} onClick={() => setOpenDialog(true)}>
+                Supprimer
+              </Button>
+            )}
+          </Box>
         </Box>
 
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>

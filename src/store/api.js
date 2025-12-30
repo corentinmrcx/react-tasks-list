@@ -29,6 +29,17 @@ export const api = createApi({
       }),
       invalidatesTags: ['TaskLists'],
     }),
+    updateTaskList: build.mutation({
+      query: ({ id, title }) => ({
+          url: `/task_lists/${id}`,
+          method: 'PATCH',
+          body: JSON.stringify({ title }),
+          headers: {
+              'Content-Type': 'application/merge-patch+json'
+          }
+      }),
+      invalidatesTags: ['TaskLists']
+    }),
     deleteTaskList: build.mutation({
       query: (id) => ({
         url: `/task_lists/${id}`,
@@ -72,4 +83,4 @@ export const api = createApi({
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useUpdateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation } = api;
