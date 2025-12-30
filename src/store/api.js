@@ -5,15 +5,18 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: 'https://iut-rcc-infoapi.univ-reims.fr/tasks/api',
   }),
+  tagTypes: ['TaskLists'],
   endpoints: (build) => ({
     getAuthenticatedUser: build.query({
       query: () => '/me',
     }),
     getTaskLists: build.query({
       query: () => '/me/task_lists',
+      providesTags: ['TaskLists'],
     }),
     getTaskList: build.query({
       query: (id) => `/task_lists/${id}`,
+      providesTags: (result, error, id) => [{ type: 'TaskLists', id }],
     }),
     createTaskList: build.mutation({
       query: (taskList) => ({
@@ -24,12 +27,14 @@ export const api = createApi({
           'Content-Type': 'application/ld+json',
         },
       }),
+      invalidatesTags: ['TaskLists'],
     }),
     deleteTaskList: build.mutation({
       query: (id) => ({
         url: `/task_lists/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['TaskLists'],
     }),
     authenticateUser: build.mutation({
        async queryFn({ login, password, remember = false, ttl = 30 }, queryApi, extraOptions, baseQuery) {

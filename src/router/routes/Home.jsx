@@ -9,7 +9,7 @@ import NotificationButtons from '../../components/NotificationButtons';
 
 export default function Home() {
   const [openModal, setOpenModal] = useState(false);
-  const { data: taskListsData, refetch } = useGetTaskListsQuery();
+  const { data: taskListsData, isFetching } = useGetTaskListsQuery();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 3, gap: 3 }}>
@@ -24,13 +24,6 @@ export default function Home() {
           onClick={() => setOpenModal(true)}
         >
           Nouvelle liste
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<RefreshIcon />}
-          onClick={() => refetch()}
-        >
-          Actualiser
         </Button>
       </Box>
 
