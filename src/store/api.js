@@ -51,6 +51,10 @@ export const api = createApi({
       query: (id) => `/task_list/${id}/collaborators`,
       providesTags: (result, error, id) => [{ type: 'TaskListCollaborators', id }],
     }),
+    getTaskListTasks: build.query({
+      query: (taskListId) => `task_list/${taskListId}/tasks`,
+      providesTags: ['TaskLists'],
+    }),
     getUsers: build.query({
       query: (page = 1) => `/users?page=${page}`,
     }),
@@ -67,6 +71,35 @@ export const api = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: (result, error, { taskListId }) => [{ type: 'TaskListCollaborators', id: taskListId }],
+    }),
+    createTask: build.mutation({
+      query: ({ taskListId, task }) => ({
+        url: `task_list/${taskListId}/tasks`,
+        method: 'POST',
+        body: JSON.stringify(task),
+        headers: {
+          'Content-Type': 'application/ld+json',
+        },
+      }),
+      invalidatesTags: ['TaskLists'],
+    }),
+    updateTask: build.mutation({
+      query: ({ taskId, task }) => ({
+        url: `tasks/${taskId}`,
+        method: 'PATCH',
+        body: JSON.stringify(task),
+        headers: {
+          'Content-Type': 'application/merge-patch+json',
+        },
+      }),
+      invalidatesTags: ['TaskLists'],
+    }),
+    deleteTask: build.mutation({
+      query: (taskId) => ({
+        url: `tasks/${taskId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['TaskLists'],
     }),
     authenticateUser: build.mutation({
        async queryFn({ login, password, remember = false, ttl = 30 }, queryApi, extraOptions, baseQuery) {
@@ -104,4 +137,4 @@ export const api = createApi({
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useUpdateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation, useGetTaskListCollaboratorsQuery, useGetUsersQuery, useAddCollaboratorMutation, useRemoveCollaboratorMutation } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useUpdateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation, useGetTaskListCollaboratorsQuery, useGetTaskListTasksQuery, useGetUsersQuery, useAddCollaboratorMutation, useRemoveCollaboratorMutation, useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } = api;

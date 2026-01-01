@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Avatar, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Avatar, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Typography } from '@mui/material';
 import { useLocation, useParams } from 'wouter';
 import { AvatarGroup } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import { useDeleteTaskListMutation, useGetTaskListCollaboratorsQuery, useGetTaskListQuery, useUpdateTaskListMutation } from '../../store/api';
+import { useCreateTaskMutation, useDeleteTaskListMutation, useDeleteTaskMutation, useGetTaskListCollaboratorsQuery, useGetTaskListQuery, useGetTaskListTasksQuery, useUpdateTaskMutation, useUpdateTaskListMutation } from '../../store/api';
 import { useDispatch } from 'react-redux';
 import { addNotification } from '../../store/slices/notification';
 import AddCollaborators from '../../components/AddCollaborators';
+import CreateTask from '../../components/CreateTask';
+import TaskItem from '../../components/TaskItem';
 import TaskListEdit from '../../components/TaskListEdit';
 
 export default function TaskListDetails() {
@@ -14,7 +16,11 @@ export default function TaskListDetails() {
   const [, setLocation] = useLocation();
   const { data: taskList, isLoading } = useGetTaskListQuery(id);
   const { data: collaborators, isLoading: isLoadingCollaborators } = useGetTaskListCollaboratorsQuery(id);
+  const { data: tasks, isLoading: isLoadingTasks } = useGetTaskListTasksQuery(id);
+  const [createTask] = useCreateTaskMutation();
   const [deleteTaskList] = useDeleteTaskListMutation();
+  const [deleteTask] = useDeleteTaskMutation();
+  const [updateTask] = useUpdateTaskMutation();
   const [updateTaskList] = useUpdateTaskListMutation();
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -51,6 +57,50 @@ export default function TaskListDetails() {
         type: 'error',
       }));
       console.error('Erreur lors de la mise à jour:', err);
+    }
+  };
+
+  const handleCreateTask = async (task) => {
+    try {
+      await createTask({ taskListId: id, task }).unwrap();
+      dispatch(addNotification({
+        content: 'Tache ajoutee avec succes',
+        type: 'success',
+      }));
+    } catch (err) {
+      dispatch(addNotification({
+        content: 'Erreur lors de l\'ajout de la tache',
+        type: 'error',
+      }));
+      console.error('Erreur lors de l\'ajout de la tache:', err);
+    }
+  };
+
+  const handleUpdateTask = async (taskId, task) => {
+    try {
+      await updateTask({ taskId, task }).unwrap();
+    } catch (err) {
+      dispatch(addNotification({
+        content: 'Erreur lors de la mise a jour de la tache',
+        type: 'error',
+      }));
+      console.error('Erreur lors de la mise a jour de la tache:', err);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await deleteTask(taskId).unwrap();
+      dispatch(addNotification({
+        content: 'Tache supprimee avec succes',
+        type: 'success',
+      }));
+    } catch (err) {
+      dispatch(addNotification({
+        content: 'Erreur lors de la suppression de la tache',
+        type: 'error',
+      }));
+      console.error('Erreur lors de la suppression de la tache:', err);
     }
   };
 
@@ -102,12 +152,12 @@ export default function TaskListDetails() {
                 {isEditMode ? 'Terminer' : 'Modifier'}
               </Button>
             )}
-            {isEditMode && (
+            {taskList.owner && isEditMode && (
               <Button color="error" startIcon={<Delete />} onClick={() => setOpenDialog(true)}>
                 Supprimer
               </Button>
             )}
-            {isEditMode && (
+            {taskList.owner && isEditMode && (
               <Button
                 variant="outlined"
                 onClick={() => setIsAddCollaboratorsOpen(true)}
@@ -133,6 +183,28 @@ export default function TaskListDetails() {
           open={isAddCollaboratorsOpen}
           onClose={() => setIsAddCollaboratorsOpen(false)}
         />
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>Taches :</Typography>
+
+          {isLoadingTasks ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Paper>
+              {tasks?.['hydra:member']?.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  isEditMode={isEditMode}
+                  onUpdate={(updatedTask) => handleUpdateTask(task.id, updatedTask)}
+                  onDelete={() => handleDeleteTask(task.id)}
+                />
+              ))}
+              {isEditMode && <CreateTask onSubmit={handleCreateTask} />}
+            </Paper>
+          )}
+        </Box>
       </Box>
     </>
   );
