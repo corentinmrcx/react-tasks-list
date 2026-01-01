@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Avatar, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { useLocation, useParams } from 'wouter';
+import { AvatarGroup } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import { useDeleteTaskListMutation, useGetTaskListQuery, useUpdateTaskListMutation } from '../../store/api';
+import { useDeleteTaskListMutation, useGetTaskListQuery, useUpdateTaskListMutation, useGetTaskListCollaboratorsQuery } from '../../store/api';
 import { useDispatch } from 'react-redux';
 import { addNotification } from '../../store/slices/notification';
 import TaskListEdit from '../../components/TaskListEdit';
@@ -11,6 +12,7 @@ export default function TaskListDetails() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const { data: taskList, isLoading } = useGetTaskListQuery(id);
+  const { data: collaborators, isLoading: isLoadingCollaborators } = useGetTaskListCollaboratorsQuery(id);
   const [deleteTaskList] = useDeleteTaskListMutation();
   const [updateTaskList] = useUpdateTaskListMutation();
   const [openDialog, setOpenDialog] = useState(false);
@@ -63,6 +65,30 @@ export default function TaskListDetails() {
           ) : (
             <Typography variant="h4">{taskList.title}</Typography>
           )}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', minHeight: 40 }}>
+            {isLoadingCollaborators ? (
+              <CircularProgress size={24} />
+            ) : (
+              <>
+                {collaborators?.['hydra:member']?.length ? (
+                  <AvatarGroup>
+                    {collaborators['hydra:member'].map((collaborator) => (
+                      <Avatar
+                        key={collaborator.id}
+                        src={`https://iut-rcc-infoapi.univ-reims.fr/tasks/api/users/${collaborator.id}/avatar`}
+                        alt={collaborator.name || collaborator.login}
+                      />
+                    ))}
+                  </AvatarGroup>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Aucun collaborateur
+                  </Typography>
+                )}
+              </>
+            )}
+          </Box>
           
           <Box sx={{ display: 'flex', gap: 1 }}>
             {taskList.owner && (

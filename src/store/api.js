@@ -47,6 +47,9 @@ export const api = createApi({
       }),
       invalidatesTags: ['TaskLists'],
     }),
+    getTaskListCollaborators: build.query({
+      query: (id) => `/task_list/${id}/collaborators`,
+    }),
     authenticateUser: build.mutation({
        async queryFn({ login, password, remember = false, ttl = 30 }, queryApi, extraOptions, baseQuery) {
         const authResult = await baseQuery({
@@ -83,4 +86,4 @@ export const api = createApi({
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useUpdateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useUpdateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation, useGetTaskListCollaboratorsQuery } = api;
