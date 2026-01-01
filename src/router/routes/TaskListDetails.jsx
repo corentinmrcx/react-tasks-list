@@ -3,9 +3,10 @@ import { Avatar, Box, Button, CircularProgress, Dialog, DialogActions, DialogCon
 import { useLocation, useParams } from 'wouter';
 import { AvatarGroup } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import { useDeleteTaskListMutation, useGetTaskListQuery, useUpdateTaskListMutation, useGetTaskListCollaboratorsQuery } from '../../store/api';
+import { useDeleteTaskListMutation, useGetTaskListCollaboratorsQuery, useGetTaskListQuery, useUpdateTaskListMutation } from '../../store/api';
 import { useDispatch } from 'react-redux';
 import { addNotification } from '../../store/slices/notification';
+import AddCollaborators from '../../components/AddCollaborators';
 import TaskListEdit from '../../components/TaskListEdit';
 
 export default function TaskListDetails() {
@@ -17,6 +18,7 @@ export default function TaskListDetails() {
   const [updateTaskList] = useUpdateTaskListMutation();
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isAddCollaboratorsOpen, setIsAddCollaboratorsOpen] = useState(false);
   const dispatch = useDispatch();
 
   const handleDelete = async () => {
@@ -105,6 +107,14 @@ export default function TaskListDetails() {
                 Supprimer
               </Button>
             )}
+            {isEditMode && (
+              <Button
+                variant="outlined"
+                onClick={() => setIsAddCollaboratorsOpen(true)}
+              >
+                Ajouter des collaborateurs
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -118,6 +128,11 @@ export default function TaskListDetails() {
             <Button onClick={handleDelete} color="error">Supprimer</Button>
           </DialogActions>
         </Dialog>
+        <AddCollaborators
+          taskListId={id}
+          open={isAddCollaboratorsOpen}
+          onClose={() => setIsAddCollaboratorsOpen(false)}
+        />
       </Box>
     </>
   );

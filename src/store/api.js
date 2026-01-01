@@ -5,7 +5,7 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: 'https://iut-rcc-infoapi.univ-reims.fr/tasks/api',
   }),
-  tagTypes: ['TaskLists'],
+  tagTypes: ['TaskLists', 'TaskListCollaborators'],
   endpoints: (build) => ({
     getAuthenticatedUser: build.query({
       query: () => '/me',
@@ -49,6 +49,24 @@ export const api = createApi({
     }),
     getTaskListCollaborators: build.query({
       query: (id) => `/task_list/${id}/collaborators`,
+      providesTags: (result, error, id) => [{ type: 'TaskListCollaborators', id }],
+    }),
+    getUsers: build.query({
+      query: (page = 1) => `/users?page=${page}`,
+    }),
+    addCollaborator: build.mutation({
+      query: ({ taskListId, userId }) => ({
+        url: `/task_lists/${taskListId}/collaborators/${userId}`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, { taskListId }) => [{ type: 'TaskListCollaborators', id: taskListId }],
+    }),
+    removeCollaborator: build.mutation({
+      query: ({ taskListId, userId }) => ({
+        url: `/task_lists/${taskListId}/collaborators/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { taskListId }) => [{ type: 'TaskListCollaborators', id: taskListId }],
     }),
     authenticateUser: build.mutation({
        async queryFn({ login, password, remember = false, ttl = 30 }, queryApi, extraOptions, baseQuery) {
@@ -86,4 +104,4 @@ export const api = createApi({
   })
 });
 
-export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useUpdateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation, useGetTaskListCollaboratorsQuery } = api;
+export const { useGetAuthenticatedUserQuery, useGetTaskListsQuery, useGetTaskListQuery, useCreateTaskListMutation, useUpdateTaskListMutation, useDeleteTaskListMutation, useAuthenticateUserMutation, useLogoutUserMutation, useGetTaskListCollaboratorsQuery, useGetUsersQuery, useAddCollaboratorMutation, useRemoveCollaboratorMutation } = api;
